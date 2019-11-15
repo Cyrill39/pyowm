@@ -1,0 +1,343 @@
+{
+  Вариант 27. №10
+  Дана строка, содержащая русский текст. Если в тексте есть слово-палиндром 
+  длиной более 2-х букв, то вывести слова текста в соответствии с возрастанием 
+  количества гласных, в противном случае удалить в словах текста гласные 
+  буквы и вывести полученные слова в алфавитном поpядке.
+}
+type
+  MY_ARRAY = array [1..1000] of string;
+const
+  VOWEL = ['а', 'е', 'ё', 'и', 'о', 'у', 'ы', 'э', 'ю', 'я',
+  'А', 'Е', 'Ё', 'И', 'О', 'У', 'Ы', 'Э', 'Ю', 'Я'];
+  UNNECESSARY = [' ', ',', '.', ':', '-' '!', '?', ';', '0'..'9'];
+var
+  s: string;
+
+function MY_Reset(w : string) : string;
+var i: integer;
+begin
+  for i:= 1 to length(w) do 
+     w[i]:=lowcase(w[i]);
+  MY_Reset:=w;
+end;
+
+function PALINDROME(w: string): boolean;
+var
+  i: integer;
+begin
+  if (length(w) > 2) then
+    PALINDROME:= True
+      else
+    PALINDROME:= False;
+    
+  w:= MY_Reset(w);
+  for i:= 1 to (Length(w) div 2) do
+    if w[Length(w) + 1 - i] <> w[i] then
+    begin
+      PALINDROME := False;
+      exit;
+    end;
+end;
+
+function CHEK_PALINDROME(s: string): boolean;
+var
+  i, n: integer;
+  w: string;
+begin
+  s:= MY_Reset(s);
+  CHEK_PALINDROME:= False;
+  for i:= 1 to length(s) - 1 do
+    if not (s[i] in UNNECESSARY) then 
+    begin
+      n:= n + 1;
+      if (n > 1) and (s[i + 1] in UNNECESSARY) then 
+      begin
+        w:= Copy(s, i - n + 1, n);
+        if (PALINDROME(w) = true) then 
+        begin
+          CHEK_PALINDROME:= true;
+          exit;
+        end;
+      end;
+    end
+    else n:= 0;
+end;
+
+
+function COUNT_VOWEL(w: string): integer;
+var
+  i, k: integer;
+begin
+  k:= 0;
+  w:= MY_Reset(w);
+  for i:= 1 to length(w) do
+    if (w[i] in VOWEL) then 
+      k:= k + 1;
+  COUNT_VOWEL:= k;
+end;
+
+function COUNT_VOWEL_LETTER(w: string): string;
+var
+  i: integer;
+  k: string;
+begin
+  k:= ' ';
+  w:= MY_Reset(w);
+  for i:= 1 to length(w) do
+    if (w[i] in VOWEL) then 
+      k:= k + w[i];
+  COUNT_VOWEL_LETTER:= k;
+end;
+
+procedure SORT_BY_VOWEL(s: string);
+var
+  A: MY_ARRAY;
+  w: string;
+  i, j, n: integer;
+begin  
+  j:= 1;
+  for i:= 1 to length(s) - 1 do
+    if not (s[i] in UNNECESSARY) then 
+    begin
+      n:= n + 1;
+      if (s[i + 1] in UNNECESSARY) then 
+      begin
+        A[j]:= Copy(s, i - n + 1, n);
+        j:= j + 1;
+      end;
+    end
+    else n := 0;
+  
+  for i:= 1 to j - 1 do
+    for n:= i + 1 to j do
+      if COUNT_VOWEL(A[i]) > COUNT_VOWEL(A[n]) then 
+      begin
+        w:= A[i];
+        A[i]:= A[n];
+        A[n]:= w;
+      end;
+  writeln(A[1], COUNT_VOWEL_LETTER(A[1]));
+  for i:= 2 to j do { <-------------------------------------------------- }
+    writeln(A[i], '(', COUNT_VOWEL_LETTER(A[i]), ')');
+    
+end;
+
+procedure Sort(s: string);
+var
+  A,B: MY_ARRAY;
+  i, n, j: integer;
+  w: string;
+begin
+  i:= 1;
+  while i <> Length(s) do
+  begin
+    if s[i] in VOWEL then Delete(s, i, 1) 
+      else 
+    i:= i + 1;
+  end;
+  j:= 1;
+  for i:= 1 to length(s) - 1 do
+    if not (s[i] in UNNECESSARY) then 
+    begin
+      n:= n + 1;
+      if (n > 0) and (s[i + 1] in UNNECESSARY) then 
+      begin
+        A[j]:= MY_Reset(Copy(s, i - n + 1, n));
+        B[j]:= Copy(s, i - n + 1, n);
+        j:= j + 1;
+      end;
+    end
+    else n:= 0; 
+  
+  for i:= 1 to j - 1 do
+    for n:= i + 1 to j do
+      if A[i] > A[n] then
+      begin
+        w:= A[i];
+        A[i]:= A[n];
+        A[n]:= w;
+        w:= B[i];
+        B[i]:= B[n];
+        B[n]:= w;
+      end; 
+  for i:= 1 to j do
+    writeln(B[i], ' ');
+end;
+
+begin
+  write('Введённая строка ---> ');
+  readln(s);
+  s:= s + ' ';
+  if (CHEK_PALINDROME(s)) then 
+    SORT_BY_VOWEL(s)
+      else 
+    Sort(s);
+end.
+
+{=================================================================}
+
+{
+Вариант 17.
+Дана строка, содержащая русский текст. Если в тексте
+нет слов-палиндрoмов длиной более 1-й буквы, то вывести 
+слова текста в соответствии с убыванием количества
+глухих согласных, в противном случае удалить из слов
+текста гласные буквы и вывести полученные слова в поpядке,
+обpатном к алфавитному(Глухие согласные: пфкшстхцчщ).
+}
+program L10_B17;
+
+type
+  Mass = array [1..1000] of string;
+
+const
+  Gluhie = ['п', 'ф', 'к', 'ш', 'с', 'т', 'х', 'ц', 'ч', 'щ'];
+  Glasnie = ['а', 'е', 'ё', 'и', 'о', 'у', 'ы', 'э', 'ю', 'я',
+  'А', 'Е', 'Ё', 'И', 'О', 'У', 'Ы', 'Э', 'Ю', 'Я'];
+  Nenujnie = [' ', ',', '!', '.', '?', ';', '0'..'9'];
+  Alphavit = ['А'..'Я', 'а'..'я'];
+  WR = 'АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ';
+  NR = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюя';
+
+function SbrosReg(w : string) : string;
+var i : integer;
+begin
+  for i := 1 to length(w) do 
+     w[i]:=lowcase(w[i]);
+  SbrosReg:=w;
+end;
+
+function PalindromTest(w: string): boolean;
+var
+  i: integer;
+begin
+  PalindromTest := True;
+  w := SbrosReg(w);
+  for i := 1 to (Length(w) div 2) do
+    if w[Length(w) + 1 - i] <> w[i] then
+    begin
+      PalindromTest := False;
+      exit;
+    end;
+end;
+
+function ProverkaNaPalindrom(s: string): boolean;
+var
+  i, n: integer;
+  w: string;
+begin
+  s := SbrosReg(s);
+  ProverkaNaPalindrom := False;
+  for i := 1 to length(s) - 1 do
+    if not (s[i] in Nenujnie) then 
+    begin
+      n := n + 1;
+      if (n > 1) and (s[i + 1] in Nenujnie) then 
+      begin
+        w := Copy(s, i - n + 1, n);
+        if (PalindromTest(w) = true) then 
+        begin
+          ProverkaNaPalindrom := true;
+          exit;
+        end;
+      end;
+    end
+    else n := 0;
+end;
+
+
+function PodschetGluhih(w: string): integer;
+var
+  i, k: integer;
+begin
+  k := 0;
+  w := SbrosReg(w);
+  for i := 1 to length(w) do
+    if (w[i] in Gluhie) then k := k + 1;
+  PodschetGluhih := k;
+end;
+
+procedure SortPoGluhim(s: string);
+var
+  A: Mass;
+  w: string;
+  i, j, n: integer;
+begin
+  
+  j := 1;
+  
+  for i := 1 to length(s) - 1 do
+    if not (s[i] in Nenujnie) then 
+    begin
+      n := n + 1;
+      if (s[i + 1] in Nenujnie) then 
+      begin
+        A[j] := Copy(s, i - n + 1, n);
+        j := j + 1;
+      end;
+    end
+    else n := 0;
+  
+  for i := 1 to j - 1 do
+    for n := i + 1 to j do
+      if PodschetGluhih(A[i]) < PodschetGluhih(A[n]) then 
+      begin
+        w := A[i];
+        A[i] := A[n];
+        A[n] := w;
+      end;
+  
+  for i := 1 to j-1 do writeln(A[i],'(', PodschetGluhih(A[i]),')', ' ');
+end;
+
+procedure Sort(s: string);
+var
+  A,B: Mass;
+  i, n, j: integer;
+  w: string;
+begin
+  i := 1;
+  while i <> Length(s) do
+  begin
+    if s[i] in Glasnie then Delete(s, i, 1) else i := i + 1;
+  end;
+  j := 1;
+  for i := 1 to length(s) - 1 do
+    if not (s[i] in Nenujnie) then 
+    begin
+      n := n + 1;
+      if (n > 0) and (s[i + 1] in Nenujnie) then 
+      begin
+        A[j] := SbrosReg(Copy(s, i - n + 1, n));
+        B[j] := Copy(s, i - n + 1, n);
+        j := j + 1;
+      end;
+    end
+    else n := 0; 
+  
+  for i := 1 to j - 1 do
+    for n := i + 1 to j do
+      if A[i] < A[n] then
+      begin
+        w := A[i];
+        A[i] := A[n];
+        A[n] := w;
+        w := B[i];
+        B[i] := B[n];
+        B[n] := w;
+      end; 
+  for i := 1 to j do
+    writeln(B[i], ' ');
+end;
+
+var
+  s: string;
+
+begin
+  write('Строка - ');
+  readln(s);
+  s := s + ' ';
+  if not(ProverkaNaPalindrom(s)) then SortPoGluhim(s)
+  else Sort(s);
+end.
